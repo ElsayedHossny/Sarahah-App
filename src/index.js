@@ -1,24 +1,22 @@
 import express from "express";
-import authorsRouter from "./Modules/authors/authors.controller.js";
-import booksRouter from "./Modules/books/books.controller.js";
-import { dbConnection } from "./DB/db.connect.js";
-import { setupDB } from "./DB/db.createCollections.js";
-import logsRouter from "./Modules/logs/logs.controller.js";
+import authRouter from "./Modules/Auth/auth.controller.js";
+import userRouter from "./Modules/User/user.controller.js";
+import messageRouter from "./Modules/Messages/messages.controller.js";
+import dbConnection from "./DB/db.connect.js";
 const app = express();
 
 app.use(express.json());
 
 dbConnection();
 
-await setupDB();
-
 app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
+  res.json({ message: "Hello World :::::" });
 });
+
 // Router middlewares
-app.use("/collection/authors", authorsRouter);
-app.use("/collection/books", booksRouter);
-app.use("/collection/logs", logsRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
+app.use("/api/message", messageRouter);
 
 // handle Router Not Found
 app.use((req, res) => {

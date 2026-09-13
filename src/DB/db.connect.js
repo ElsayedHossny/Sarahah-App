@@ -1,17 +1,12 @@
-import { MongoClient } from "mongodb";
-
-const uri = "mongodb://localhost:27017";
-const client = new MongoClient(uri);
-
-const db = client.db("author_books_db");
+import mongoose from "mongoose";
 
 const dbConnection = async () => {
   try {
-    await client.connect();
-    console.log("Database connected");
+    await mongoose.connect("mongodb://127.0.0.1:27017/sarahah-app");
+    console.log("database connection");
   } catch (error) {
-    console.log("DB connection error", error);
+    console.log("Error in database connection", error);
   }
 };
 
-export { dbConnection, db };
+export default dbConnection;
