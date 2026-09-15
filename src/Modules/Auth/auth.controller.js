@@ -8,7 +8,8 @@ authRouter.get("/", (req, res, next) => {
 });
 
 authRouter.post("/signup", async (req, res, next) => {
-  const { firstName, lastName, email, password, gender, age } = await req.body;
+  const { firstName, lastName, email, password, gender, age, phone } =
+    await req.body;
   const result = await authServices.registerUser({
     firstName,
     lastName,
@@ -16,6 +17,7 @@ authRouter.post("/signup", async (req, res, next) => {
     password,
     gender,
     age,
+    phone,
   });
   res
     .status(201)

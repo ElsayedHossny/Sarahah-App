@@ -39,6 +39,7 @@ const UserSchema = new mongoose.Schema(
       max: [30, "Age must be at least 100"],
     },
     profilePicture: String,
+    phone: String,
   },
   {
     virtuals: {
