@@ -1,4 +1,5 @@
 import userModel from "../../DB/models/user.model.js";
+import { decryption } from "../../Utils/Security/encryption.security.js";
 
 /** 
 updateOne => return modifiedCount 
@@ -39,4 +40,17 @@ export const updatedProfile = async (body, userId) => {
 
 export const deleteProfile = async (userId) => {
   return userModel.findByIdAndDelete(userId);
+};
+
+export const findProfileById = async (userId) => {
+  const user = await userModel.findById(userId);
+  if (!user) {
+    throw new Error("Invalid User Id");
+  }
+  // Decryption
+  const { phone } = user;
+  const phoneDecrypt = decryption(phone);
+  user.phone = phoneDecrypt;
+
+  return user;
 };

@@ -28,4 +28,10 @@ userRouter.delete("/delete/:userId", async (req, res, next) => {
   res.json({ message: "User deleted", result });
 });
 
+userRouter.get("/userprofile/:userId", async (req, res, next) => {
+  const { userId } = req.params;
+  const result = await userServices.findProfileById(userId);
+  res.json({ message: "User Profile", result });
+});
+
 export default userRouter;

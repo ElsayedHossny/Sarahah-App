@@ -21,11 +21,9 @@ export const registerUser = async (body) => {
   console.log(phone);
 
   const phoneEncryption = encryption(phone);
-  console.log(phoneEncryption);
-
-  const [iv, chipertext] = phoneEncryption.split(":");
-
-  console.log(iv, chipertexts);
+  // console.log(phoneEncryption);
+  // const [iv, chipertext] = phoneEncryption.split(":");
+  // console.log(iv, chipertext);
 
   return userModel.create({
     firstName,
