@@ -1,10 +1,13 @@
 import userModel from "../../DB/models/user.model.js";
 
 /**
- *
- * @param { firstName, lastName, email, password, gender, age } body
- * check if Email Exist
- * the if not Exist i will add it
+find 
+findById
+findOne 
+
+create 
+insertMany
+save 'objectId' new instance from userModel
  */
 
 export const registerUser = async (body) => {
@@ -14,6 +17,7 @@ export const registerUser = async (body) => {
   if (isExist) {
     throw new Error("Email is Already Exist. ");
   }
+
   return userModel.create({
     firstName,
     lastName,
