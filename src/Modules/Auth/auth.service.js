@@ -1,5 +1,5 @@
 import userModel from "../../DB/models/user.model.js";
-import { encryption } from "../../Utils/Security/encryption.security.js";
+import { encryptionSymmetric } from "../../Utils/Security/encryption.security.js";
 
 /**
 find 
@@ -20,10 +20,7 @@ export const registerUser = async (body) => {
   }
   console.log(phone);
 
-  const phoneEncryption = encryption(phone);
-  // console.log(phoneEncryption);
-  // const [iv, chipertext] = phoneEncryption.split(":");
-  // console.log(iv, chipertext);
+  const phoneEncryption = encryptionSymmetric(phone);
 
   return userModel.create({
     firstName,

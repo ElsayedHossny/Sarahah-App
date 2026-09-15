@@ -1,5 +1,5 @@
 import userModel from "../../DB/models/user.model.js";
-import { decryption } from "../../Utils/Security/encryption.security.js";
+import { decryptionSymmetric } from "../../Utils/Security/encryption.security.js";
 
 /** 
 updateOne => return modifiedCount 
@@ -49,7 +49,7 @@ export const findProfileById = async (userId) => {
   }
   // Decryption
   const { phone } = user;
-  const phoneDecrypt = decryption(phone);
+  const phoneDecrypt = decryptionSymmetric(phone);
   user.phone = phoneDecrypt;
 
   return user;
