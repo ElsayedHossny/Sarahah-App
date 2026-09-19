@@ -1,5 +1,6 @@
 import userModel from "../../DB/models/user.model.js";
 import { encryptionSymmetric } from "../../Utils/Security/encryption.security.js";
+import { compareTwoHashs, hash } from "../../Utils/Security/hash.security.js";
 
 /**
 find 
@@ -18,15 +19,17 @@ export const registerUser = async (body) => {
   if (isExist) {
     throw new Error("Email is Already Exist. ");
   }
-  console.log(phone);
+  // console.log(phone);
 
   const phoneEncryption = encryptionSymmetric(phone);
+
+  const hashPassword = await hash(password);
 
   return userModel.create({
     firstName,
     lastName,
     email,
-    password,
+    password: hashPassword,
     gender,
     age,
     phone: phoneEncryption,
@@ -35,9 +38,18 @@ export const registerUser = async (body) => {
 
 export const loginUser = async (body) => {
   const { email, password } = body;
-  const isExist = await userModel.findOne({ email, password });
+
+  const isExist = await userModel.findOne({ email });
+
   if (!isExist) {
     throw new Error("Email or Password Not Correct.");
   }
+
+  const isPasswordCorrect = await compareTwoHashs(isExist.password, password);
+
+  if (!isPasswordCorrect) {
+    throw new Error("Email or Password Not Correct.");
+  }
+
   return isExist;
 };
