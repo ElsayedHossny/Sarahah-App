@@ -1,3 +1,4 @@
+import "./Config/env.config.js";
 import express from "express";
 import authRouter from "./Modules/Auth/auth.controller.js";
 import userRouter from "./Modules/User/user.controller.js";
@@ -30,8 +31,9 @@ app.use((err, req, res, next) => {
   });
 });
 // Server Connect
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server is running ::");
 });
 
 // console.log(process.env);
+console.log(process.env);

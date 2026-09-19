@@ -1,11 +1,9 @@
 import crypto from "node:crypto";
 
 //==================================== Symmetric Encryption =====================================//
-const IV_LENGTH = 16;
-const ENCRYPTION_KEY = Buffer.from(
-  "7f3a9c2e81d64b05f2a7e93c4d8b1a60e5f9472c3a1d8e6b9f0c5a27d4e8136b",
-  "hex",
-);
+const IV_LENGTH = parseInt(process.env.IV_LENGTH);
+
+const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
 export const encryptionSymmetric = (plaintext) => {
   const iv = crypto.randomBytes(IV_LENGTH);
