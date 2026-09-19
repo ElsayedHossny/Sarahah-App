@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
+import { envConfig } from "../../Config/env.config.js";
 
 //==================================== Symmetric Encryption =====================================//
-const IV_LENGTH = parseInt(process.env.IV_LENGTH);
+const IV_LENGTH = envConfig.encryption.iv;
 
-const ENCRYPTION_KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+const ENCRYPTION_KEY = Buffer.from(envConfig.encryption.key, "hex");
 
 export const encryptionSymmetric = (plaintext) => {
   const iv = crypto.randomBytes(IV_LENGTH);
