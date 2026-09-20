@@ -33,5 +33,9 @@ userRouter.get("/userprofile/:userId", async (req, res, next) => {
   const result = await userServices.findProfileById(userId);
   res.json({ message: "User Profile", result });
 });
+userRouter.get("/alluserprofiles", async (req, res, next) => {
+  const result = await userServices.findAllUsers();
+  res.json({ message: "all User Profile", result });
+});
 
 export default userRouter;

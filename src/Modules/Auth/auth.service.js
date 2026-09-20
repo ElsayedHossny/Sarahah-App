@@ -1,5 +1,9 @@
 import userModel from "../../DB/models/user.model.js";
-import { encryptionSymmetric } from "../../Utils/Security/encryption.security.js";
+import UserRepository from "../../DB/Repositories/user.repository.js";
+import {
+  decryptionSymmetric,
+  encryptionSymmetric,
+} from "../../Utils/Security/encryption.security.js";
 import { compareTwoHashs, hash } from "../../Utils/Security/hash.security.js";
 
 /**
@@ -12,10 +16,12 @@ insertMany
 save 'objectId' new instance from userModel
  */
 
+const authRepo = new UserRepository();
+
 export const registerUser = async (body) => {
   const { firstName, lastName, email, password, gender, age, phone } = body;
   // 1- check if email exist
-  const isExist = await userModel.findOne({ email });
+  const isExist = await authRepo.findOneDocument({ email });
   if (isExist) {
     throw new Error("Email is Already Exist. ");
   }
@@ -25,7 +31,7 @@ export const registerUser = async (body) => {
 
   const hashPassword = await hash(password);
 
-  return userModel.create({
+  return authRepo.createOneDocument({
     firstName,
     lastName,
     email,
@@ -39,17 +45,18 @@ export const registerUser = async (body) => {
 export const loginUser = async (body) => {
   const { email, password } = body;
 
-  const isExist = await userModel.findOne({ email });
-
+  const isExist = await authRepo.findOneDocument({ email });
   if (!isExist) {
     throw new Error("Email or Password Not Correct.");
   }
-
   const isPasswordCorrect = await compareTwoHashs(isExist.password, password);
-
   if (!isPasswordCorrect) {
     throw new Error("Email or Password Not Correct.");
   }
+
+  const { phone } = isExist;
+  const decryptPhone = decryptionSymmetric(phone);
+  isExist.phone = decryptPhone;
 
   return isExist;
 };

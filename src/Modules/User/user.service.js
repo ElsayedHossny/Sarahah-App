@@ -1,4 +1,5 @@
 import userModel from "../../DB/models/user.model.js";
+import UserRepository from "../../DB/Repositories/user.repository.js";
 import { decryptionSymmetric } from "../../Utils/Security/encryption.security.js";
 
 /** 
@@ -16,34 +17,19 @@ findOneAnddelete => return profile After or before Updated option
 findByIdAnddelete => return profile After or before Updated option
  */
 
+const userRepo = new UserRepository();
+
 export const updatedProfile = async (body, userId) => {
   const { email } = body;
-  const user = await userModel.findById(userId);
-
-  if (!user) {
-    throw new Error("Invalid User Id");
-  }
-  if (email) {
-    const existingUser = await userModel.findOne({
-      email,
-      _id: { $ne: userId },
-    });
-
-    if (existingUser) {
-      throw new Error("Email Already Exist Please Enter Another Email");
-    }
-  }
-
-  Object.assign(user, body);
-  return user.save();
+  return userRepo.updateOneWithSave(userId, email, body);
 };
 
 export const deleteProfile = async (userId) => {
-  return userModel.findByIdAndDelete(userId);
+  return userRepo.findOneAndUpdateDocument(userId);
 };
 
 export const findProfileById = async (userId) => {
-  const user = await userModel.findById(userId);
+  const user = await userRepo.findDocumentById(userId);
   if (!user) {
     throw new Error("Invalid User Id");
   }
@@ -53,4 +39,15 @@ export const findProfileById = async (userId) => {
   user.phone = phoneDecrypt;
 
   return user;
+};
+
+export const findAllUsers = async (userId) => {
+  const users = await userRepo.findAllDocuments();
+  users.map((user) => {
+    const { phone } = user;
+    const phoneDecrypt = decryptionSymmetric(phone);
+    user.phone = phoneDecrypt;
+  });
+
+  return users;
 };

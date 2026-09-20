@@ -1,11 +1,7 @@
 import { Router } from "express";
-
 import * as authServices from "./auth.service.js";
-const authRouter = Router();
 
-authRouter.get("/", (req, res, next) => {
-  res.json({ message: "auth :::::" });
-});
+const authRouter = Router();
 
 authRouter.post("/signup", async (req, res, next) => {
   const { firstName, lastName, email, password, gender, age, phone } =
