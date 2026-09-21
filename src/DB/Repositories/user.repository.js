@@ -1,5 +1,9 @@
 import BaseRepository from "./base.repository.js";
 import userModel from "../models/user.model.js";
+import {
+  ConflictException,
+  NotFoundException,
+} from "../../Utils/Error/exception.error.js";
 
 export default class UserRepository extends BaseRepository {
   constructor() {
@@ -10,7 +14,9 @@ export default class UserRepository extends BaseRepository {
     const user = await this.findDocumentById(id);
 
     if (!user) {
-      throw new Error("Invalid User Id");
+      throw new NotFoundException("User Not Found", {
+        error: "Invalid User Id",
+      });
     }
 
     if (email) {
@@ -20,7 +26,10 @@ export default class UserRepository extends BaseRepository {
       });
 
       if (existingUser) {
-        throw new Error("Email Already Exist Please Enter Another Email");
+        throw new ConflictException(
+          "Email Already Exist Please Enter Another Email",
+          { error: "This Email Is Already Exist Please Enter Another Email." },
+        );
       }
     }
 

@@ -1,5 +1,8 @@
 import UserRepository from "../../DB/Repositories/user.repository.js";
-import HttpAppError from "../../Utils/Error/app.error.js";
+import {
+  ConflictException,
+  UnauthorizedException,
+} from "../../Utils/Error/exception.error.js";
 import {
   decryptionSymmetric,
   encryptionSymmetric,
@@ -23,15 +26,9 @@ export const registerUser = async (body) => {
   // 1- check if email exist
   const isExist = await authRepo.findOneDocument({ email });
   if (isExist) {
-    throw new HttpAppError(
-      "Email already exists",
-      "AuthService",
-      409,
-      {
-        error: "Email Conflict",
-      },
-      "EMAIL_CONFLICT",
-    );
+    throw new ConflictException("Email already exists", {
+      error: "Email Conflict",
+    });
   }
 
   // console.log(phone);
@@ -56,11 +53,11 @@ export const loginUser = async (body) => {
 
   const isExist = await authRepo.findOneDocument({ email });
   if (!isExist) {
-    throw new Error("Email or Password Not Correct.");
+    throw new UnauthorizedException("Email Not Exist.");
   }
   const isPasswordCorrect = await compareTwoHashs(isExist.password, password);
   if (!isPasswordCorrect) {
-    throw new Error("Email or Password Not Correct.");
+    throw new UnauthorizedException("Email or Password Not Correct.");
   }
 
   const { phone } = isExist;

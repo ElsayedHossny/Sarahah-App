@@ -1,5 +1,5 @@
-import userModel from "../../DB/models/user.model.js";
 import UserRepository from "../../DB/Repositories/user.repository.js";
+import { NotFoundException } from "../../Utils/Error/exception.error.js";
 import { decryptionSymmetric } from "../../Utils/Security/encryption.security.js";
 
 /** 
@@ -31,7 +31,7 @@ export const deleteProfile = async (userId) => {
 export const findProfileById = async (userId) => {
   const user = await userRepo.findDocumentById(userId);
   if (!user) {
-    throw new Error("Invalid User Id");
+    throw new NotFoundException("User Not Found", { error: "Invalid User Id" });
   }
   // Decryption
   const { phone } = user;

@@ -30,6 +30,3 @@ app.use(globalErrorHandler);
 app.listen(process.env.PORT, () => {
   console.log("Server is running ::");
 });
-
-// console.log(process.env);
-console.log(process.env);
