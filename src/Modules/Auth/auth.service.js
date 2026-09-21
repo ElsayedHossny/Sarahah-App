@@ -1,5 +1,5 @@
-import userModel from "../../DB/models/user.model.js";
 import UserRepository from "../../DB/Repositories/user.repository.js";
+import HttpAppError from "../../Utils/Error/app.error.js";
 import {
   decryptionSymmetric,
   encryptionSymmetric,
@@ -23,8 +23,17 @@ export const registerUser = async (body) => {
   // 1- check if email exist
   const isExist = await authRepo.findOneDocument({ email });
   if (isExist) {
-    throw new Error("Email is Already Exist. ");
+    throw new HttpAppError(
+      "Email already exists",
+      "AuthService",
+      409,
+      {
+        error: "Email Conflict",
+      },
+      "EMAIL_CONFLICT",
+    );
   }
+
   // console.log(phone);
 
   const phoneEncryption = encryptionSymmetric(phone);
