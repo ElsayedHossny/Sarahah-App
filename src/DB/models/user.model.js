@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { string } from "zod";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -39,6 +40,10 @@ const UserSchema = new mongoose.Schema(
     },
     profilePicture: String,
     phone: String,
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+    },
   },
   {
     virtuals: {

@@ -22,7 +22,8 @@ save 'objectId' new instance from userModel
 const authRepo = new UserRepository();
 
 export const registerUser = async (body) => {
-  const { firstName, lastName, email, password, gender, age, phone } = body;
+  const { firstName, lastName, email, password, gender, age, phone, role } =
+    body;
   // 1- check if email exist
   const isExist = await authRepo.findOneDocument({ email });
   if (isExist) {
@@ -45,6 +46,7 @@ export const registerUser = async (body) => {
     gender,
     age,
     phone: phoneEncryption,
+    role,
   });
 };
 
