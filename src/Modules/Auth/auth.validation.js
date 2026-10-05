@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
+export const loginSchema = z.strictObject({
   email: z.email(),
   password: z.coerce.string().min(6).max(16),
 });
@@ -25,3 +25,15 @@ export const registerSchema = loginSchema
       path: ["confirmPassword"],
     },
   );
+
+export const login = z.object({
+  // must be object only because i can send body only or any thing only
+  body: loginSchema,
+  // for ex
+  // query: z.strictObject({
+  //   lang: z.enum(["EN", "AR"]).default("EN"),
+  // }),
+});
+export const register = z.object({
+  body: registerSchema,
+});
