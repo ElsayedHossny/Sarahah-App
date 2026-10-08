@@ -2,6 +2,8 @@ import { Router } from "express";
 import * as authServices from "./auth.service.js";
 import { login, register } from "./auth.validation.js";
 import { ValidationMiddleWare } from "../../Middleware/validation.middleware.js";
+import { generateToken } from "../../Utils/token.utils.js";
+import { envConfig } from "../../Config/env.config.js";
 
 const authRouter = Router();
 
@@ -23,7 +25,24 @@ authRouter.post(
     console.log(req.validate);
 
     const result = await authServices.loginUser(req.validate.body);
-    res.status(200).json({ message: "User login successfully", user: result });
+
+    // generate token
+    const token = generateToken(
+      {
+        _id: result._id,
+        email: result.email,
+        role: result.role,
+      },
+      {
+        expiresIn: "1h",
+      },
+    );
+
+    res.status(200).json({
+      message: "User login successfully",
+      userName: result.fullName,
+      token: token,
+    });
   },
 );
 

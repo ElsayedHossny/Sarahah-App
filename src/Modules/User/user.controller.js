@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as userServices from "./user.service.js";
+import { verifyToken } from "../../Utils/token.utils.js";
 
 const userRouter = Router();
 
@@ -30,7 +31,17 @@ userRouter.delete("/delete/:userId", async (req, res, next) => {
 
 userRouter.get("/userprofile/:userId", async (req, res, next) => {
   const { userId } = req.params;
-  const result = await userServices.findProfileById(userId);
+
+  const { authentication } = req.headers;
+
+  // first must verify Who this person
+  let verifyResult;
+  try {
+    verifyResult = verifyToken(authentication);
+  } catch (error) {
+    throw new Error(error);
+  }
+  const result = await userServices.findProfileById(verifyResult._id);
   res.json({ message: "User Profile", result });
 });
 userRouter.get("/alluserprofiles", async (req, res, next) => {

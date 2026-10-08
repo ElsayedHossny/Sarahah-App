@@ -13,4 +13,9 @@ export const envConfig = {
     key: process.env.ENCRYPTION_KEY,
     iv: parseInt(process.env.IV_LENGTH),
   },
+  jwt: {
+    user: {
+      access_token_secret: process.env.JWT_SECRET,
+    },
+  },
 };
