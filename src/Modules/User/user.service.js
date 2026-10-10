@@ -25,7 +25,7 @@ export const updatedProfile = async (body, userId) => {
 };
 
 export const deleteProfile = async (userId) => {
-  return userRepo.findOneAndUpdateDocument(userId);
+  return userRepo.findOneAndDeleteDocument(userId);
 };
 
 export const findProfileById = async (userId) => {
