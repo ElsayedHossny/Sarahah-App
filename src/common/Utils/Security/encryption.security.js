@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { envConfig } from "../../Config/env.config.js";
+import { envConfig } from "../../../Config/env.config.js";
 
 //==================================== Symmetric Encryption =====================================//
 const IV_LENGTH = envConfig.encryption.iv;

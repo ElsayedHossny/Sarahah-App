@@ -1,6 +1,6 @@
 import UserRepository from "../../DB/Repositories/user.repository.js";
-import { NotFoundException } from "../../Utils/Error/exception.error.js";
-import { decryptionSymmetric } from "../../Utils/Security/encryption.security.js";
+import { NotFoundException } from "../../common/Utils/Error/exception.error.js";
+import { decryptionSymmetric } from "../../common/Utils/Security/encryption.security.js";
 
 /** 
 updateOne => return modifiedCount 

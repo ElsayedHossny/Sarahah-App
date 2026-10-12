@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { string } from "zod";
+import { genderEnum, roleEnum } from "../../common/constants.js";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["Male", "Female", "other"],
+      enum: Object.values(genderEnum),
       default: "other",
     },
     age: {
@@ -42,7 +42,8 @@ const UserSchema = new mongoose.Schema(
     phone: String,
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: Object.values(roleEnum),
+      default: "user",
     },
   },
   {

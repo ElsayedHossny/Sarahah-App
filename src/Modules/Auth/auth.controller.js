@@ -2,8 +2,6 @@ import { Router } from "express";
 import * as authServices from "./auth.service.js";
 import { login, register } from "./auth.validation.js";
 import { ValidationMiddleWare } from "../../Middleware/validation.middleware.js";
-import { generateToken } from "../../Utils/token.utils.js";
-import { envConfig } from "../../Config/env.config.js";
 
 const authRouter = Router();
 
@@ -18,25 +16,58 @@ authRouter.post(
   },
 );
 
+// Login general
 authRouter.post(
   "/signin",
   ValidationMiddleWare(login),
   async (req, res, next) => {
-    console.log(req.validate);
+    // console.log(req.validate);
 
-    const result = await authServices.loginUser(req.validate.body);
-
-    // generate token
-    const token = generateToken(
-      {
-        _id: result._id,
-        email: result.email,
-        role: result.role,
-      },
-      {
-        expiresIn: "1h",
-      },
+    const { result, token } = await authServices.LoginAdminUser(
+      req.validate.body,
     );
+
+    res.status(200).json({
+      message: "User login successfully",
+      userName: result.fullName,
+      token: token,
+    });
+  },
+);
+
+// Login user only
+authRouter.post(
+  "/user/signin",
+  ValidationMiddleWare(login),
+  async (req, res, next) => {
+    // console.log(req.validate);
+
+    const { result, token } = await authServices.userLoginOnly(
+      req.validate.body,
+    );
+
+    // console.log(result);
+
+    res.status(200).json({
+      message: "User login successfully",
+      userName: result.fullName,
+      token: token,
+    });
+  },
+);
+
+// Admin user only
+authRouter.post(
+  "/admin/signin",
+  ValidationMiddleWare(login),
+  async (req, res, next) => {
+    // console.log(req.validate);
+
+    const { result, token } = await authServices.adminLoginOnly(
+      req.validate.body,
+    );
+
+    // console.log(result);
 
     res.status(200).json({
       message: "User login successfully",

@@ -5,6 +5,7 @@ import userRouter from "./Modules/User/user.controller.js";
 import messageRouter from "./Modules/Messages/messages.controller.js";
 import dbConnection from "./DB/db.connect.js";
 import globalErrorHandler from "./Middleware/global-error-handler.middleware.js";
+
 const app = express();
 
 app.use(express.json());

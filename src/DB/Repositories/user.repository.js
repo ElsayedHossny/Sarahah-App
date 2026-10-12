@@ -3,7 +3,7 @@ import userModel from "../models/user.model.js";
 import {
   ConflictException,
   NotFoundException,
-} from "../../Utils/Error/exception.error.js";
+} from "../../common/Utils/Error/exception.error.js";
 
 export default class UserRepository extends BaseRepository {
   constructor() {

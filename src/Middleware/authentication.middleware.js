@@ -1,25 +1,39 @@
 import UserRepository from "../DB/Repositories/user.repository.js";
-import { UnauthorizedException } from "../Utils/Error/exception.error.js";
-import { verifyToken } from "../Utils/token.utils.js";
+import { UnauthorizedException } from "../common/Utils/Error/exception.error.js";
+import {
+  decodeAndVerifyToken,
+  decodeToken,
+} from "../common/Utils/token.utils.js";
+import { envConfig } from "../Config/env.config.js";
 
+// Create a user repository instance
 const userRepo = new UserRepository();
 
 export const authentication = async (req, res, next) => {
-  // 1
-  const { authentication } = req.headers;
-  if (!authentication) {
-    throw new UnauthorizedException("Invalid authentication header");
+  // 1. Get the Authorization header from the request not (authentication)
+  const { authorization } = req.headers;
+
+  // 2. Check if the Authorization header exists
+  if (!authorization) {
+    throw new UnauthorizedException("Authorization header is missing");
   }
 
-  // 2
-  const verifyResult = verifyToken(authentication);
+  // 3. Extract the Bearer prefix and the JWT token
+  // Expected format: "Bearer <token>"
+  const [prefix, token] = authorization.split(" ");
 
-  // 3 get user data because always i depend on data from DB
-  const user = await userRepo.findDocumentById(verifyResult._id);
-  if (!user) {
-    throw new UnauthorizedException("User not found");
+  // 4. Validate the Bearer prefix and ensure the token exists
+  if (prefix !== "Bearer" || !token) {
+    throw new UnauthorizedException("Invalid Bearer token format");
   }
 
-  req.authUser = user;
+  const userDataFromDB = await decodeToken(token);
+
+  console.log("userDataFromDB", userDataFromDB);
+
+  // 8. Attach the authenticated user to the request object
+  req.authUser = userDataFromDB;
+
+  // 9. Pass control to the next middleware or route handler
   next();
 };
