@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { envConfig } from "../../Config/env.config.js";
 import { BadRequestException } from "./Error/exception.error.js";
 import UserRepository from "../../DB/Repositories/user.repository.js";
-import { TokenTypeEnum } from "../constants.js";
+import { roleEnum, TokenTypeEnum } from "../constants.js";
 
 const { user: userEnvConfig, admin: adminEnvConfig } = envConfig.jwt;
 
@@ -54,11 +54,11 @@ export const generateSecretAndExpiresInToken = (tokenType, role) => {
 
   let secret, expiresIn;
   switch (role) {
-    case "user":
+    case roleEnum.USER:
       secret = userEnvConfig[tokenSecretType];
       expiresIn = userEnvConfig[expirationTime];
       return { secret, expiresIn };
-    case "admin":
+    case roleEnum.ADMIN:
       secret = adminEnvConfig[tokenSecretType];
       expiresIn = adminEnvConfig[expirationTime];
       return { secret, expiresIn };

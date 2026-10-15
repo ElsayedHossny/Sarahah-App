@@ -18,7 +18,7 @@ import {
   generateSecretAndExpiresInToken,
   generateToken,
 } from "../../common/Utils/token.utils.js";
-import { TokenTypeEnum } from "../../common/constants.js";
+import { roleEnum, TokenTypeEnum } from "../../common/constants.js";
 
 /**
 find 
@@ -146,9 +146,9 @@ export const refreshToken = async (token) => {
 ////////////////////////////////////////////////////////////////////////////////
 export const userLoginOnly = async (body) => {
   const result = await baseCheckLogin(body);
-  if (result.role !== "user") {
+  if (result.role !== roleEnum.USER) {
     throw new ForbiddenException("You are not allowed to sign in as a user", {
-      requiredRole: "user",
+      requiredRole: roleEnum.USER,
       currentRole: result.role,
     });
   }
@@ -188,9 +188,9 @@ export const adminLoginOnly = async (body) => {
   // console.log("result", result);
   // console.log("sdsd:::", result.role);
 
-  if (result.role !== "admin") {
+  if (result.role !== roleEnum.ADMIN) {
     throw new ForbiddenException("You are not allowed to sign in as an admin", {
-      requiredRole: "admin",
+      requiredRole: roleEnum.ADMIN,
       currentRole: result.role,
     });
   }

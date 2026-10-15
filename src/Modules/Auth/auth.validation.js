@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { roleEnum } from "../../common/constants";
 
 export const loginSchema = z.strictObject({
   email: z.email(),
@@ -13,7 +14,7 @@ export const registerSchema = loginSchema
     age: z.number().min(16).max(100),
     profilePicture: z.string(),
     phone: z.e164(), //e164 => Egyption phone +20
-    role: z.literal(["user", "admin"]).default("user"),
+    role: z.literal(Object.values(roleEnum)).default(roleEnum.USER),
     confirmPassword: z.string(),
   })
   .refine(
