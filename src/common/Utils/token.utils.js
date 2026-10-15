@@ -2,21 +2,26 @@ import jwt from "jsonwebtoken";
 import { envConfig } from "../../Config/env.config.js";
 import { BadRequestException } from "./Error/exception.error.js";
 import UserRepository from "../../DB/Repositories/user.repository.js";
+import { TokenTypeEnum } from "../constants.js";
 
-const jwtConfig = envConfig.jwt;
+const { user: userEnvConfig, admin: adminEnvConfig } = envConfig.jwt;
+
 const userRepo = new UserRepository();
 // why we use functions single source of truth
 export const generateToken = (payload, secret, options) => {
   return jwt.sign(payload, secret, options);
 };
-
 export const verifyToken = (token, secret, options) => {
   return jwt.verify(token, secret, options);
 };
+////////////////////////////////////////////////////////////////////////////////////////
 
-export const decodeAndVerifyToken = (token, options) => {
+export const decodeToken = async (
+  token,
+  options,
+  tokenType = TokenTypeEnum.ACCESS,
+) => {
   const decodeToken = jwt.decode(token, options);
-  console.log("decodeToken", decodeToken);
 
   if (!decodeToken || !decodeToken.role) {
     throw new BadRequestException("Invalid token payload", {
@@ -24,14 +29,40 @@ export const decodeAndVerifyToken = (token, options) => {
       reason: "Missing required claim",
     });
   }
-  return verifyToken(token, secret);
-};
 
-export const decodeToken = async (token, options, tokenType) => {
-  const decodedData = decodeAndVerifyToken(token, options);
+  const { secret } = generateSecretAndExpiresInToken(
+    tokenType,
+    decodeToken.role,
+  );
+  // console.log("secret", secret);
+
+  const decodedData = verifyToken(token, secret);
+
   const user = await userRepo.findDocumentById(decodedData._id);
+
   if (!user) {
     throw new UnauthorizedException("User not found");
   }
+
   return user;
+};
+
+// generate secret and expiration time
+export const generateSecretAndExpiresInToken = (tokenType, role) => {
+  const tokenSecretType = `${tokenType}_token_secret`;
+  const expirationTime = `${tokenType}_token_expires_in`;
+
+  let secret, expiresIn;
+  switch (role) {
+    case "user":
+      secret = userEnvConfig[tokenSecretType];
+      expiresIn = userEnvConfig[expirationTime];
+      return { secret, expiresIn };
+    case "admin":
+      secret = adminEnvConfig[tokenSecretType];
+      expiresIn = adminEnvConfig[expirationTime];
+      return { secret, expiresIn };
+    default:
+      throw new Error("Role is not correct");
+  }
 };

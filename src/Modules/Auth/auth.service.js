@@ -13,7 +13,12 @@ import {
   encryptionSymmetric,
 } from "../../common/Utils/Security/encryption.security.js";
 import { envConfig } from "../../Config/env.config.js";
-import { generateToken } from "../../common/Utils/token.utils.js";
+import {
+  decodeToken,
+  generateSecretAndExpiresInToken,
+  generateToken,
+} from "../../common/Utils/token.utils.js";
+import { TokenTypeEnum } from "../../common/constants.js";
 
 /**
 find 
@@ -46,7 +51,7 @@ const baseCheckLogin = async (body) => {
 
   return isExist;
 };
-
+////////////////////////////////////////////////////////////////////////////
 export const registerUser = async (body) => {
   const { firstName, lastName, email, password, gender, age, phone, role } =
     body;
@@ -79,21 +84,11 @@ export const registerUser = async (body) => {
 export const LoginAdminUser = async (body) => {
   const result = await baseCheckLogin(body);
 
-  let secret, expiresIn;
-  switch (result.role) {
-    case "user":
-      secret = userEnvConfig.access_token_secret;
-      expiresIn = userEnvConfig.access_token_expires_in;
-      break;
-    case "admin":
-      secret = adminEnvConfig.access_token_secret;
-      expiresIn = adminEnvConfig.access_token_expires_in;
-      break;
-    default:
-      throw new Error("role is not correct");
-  }
-
   // generate token
+  const { secret, expiresIn } = generateSecretAndExpiresInToken(
+    TokenTypeEnum.ACCESS,
+    result.role,
+  );
   const token = generateToken(
     {
       _id: result._id,
@@ -106,9 +101,49 @@ export const LoginAdminUser = async (body) => {
     },
   );
 
-  return { result, token };
+  // generate refresh token
+  const { secret: refreshsecret, expiresIn: refreshexpiresIn } =
+    generateSecretAndExpiresInToken(TokenTypeEnum.REFRESH, result.role);
+  const refreshToken = generateToken(
+    {
+      _id: result._id,
+      email: result.email,
+      role: result.role,
+    },
+    refreshsecret,
+    {
+      expiresIn: refreshexpiresIn,
+    },
+  );
+
+  return { result, token, refreshToken };
 };
 
+export const refreshToken = async (token) => {
+  const user = await decodeToken(token, "", TokenTypeEnum.REFRESH);
+
+  const { secret, expiresIn } = generateSecretAndExpiresInToken(
+    TokenTypeEnum.ACCESS,
+    user.role,
+  );
+  // generate Access Token
+  const NewAccessToken = generateToken(
+    {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    },
+    secret,
+    {
+      expiresIn,
+    },
+  );
+
+  // console.log("NewAccessToken:::", NewAccessToken);
+
+  return NewAccessToken;
+};
+////////////////////////////////////////////////////////////////////////////////
 export const userLoginOnly = async (body) => {
   const result = await baseCheckLogin(body);
   if (result.role !== "user") {
@@ -130,7 +165,21 @@ export const userLoginOnly = async (body) => {
     },
   );
 
-  return { result, token };
+  // console.log(token);
+
+  // generate refresh token
+  const refreshToken = generateToken(
+    {
+      _id: result._id,
+      email: result.email,
+      role: result.role,
+    },
+    userEnvConfig.refresh_token_secret,
+    {
+      expiresIn: userEnvConfig.refresh_token_expires_in,
+    },
+  );
+  return { result, token, refreshToken };
 };
 
 export const adminLoginOnly = async (body) => {
@@ -158,5 +207,18 @@ export const adminLoginOnly = async (body) => {
     },
   );
 
-  return { result, token };
+  // generate refresh token
+  const refreshToken = generateToken(
+    {
+      _id: result._id,
+      email: result.email,
+      role: result.role,
+    },
+    adminEnvConfig.refresh_token_secret,
+    {
+      expiresIn: adminEnvConfig.refresh_token_expires_in,
+    },
+  );
+
+  return { result, token, refreshToken };
 };

@@ -22,15 +22,17 @@ authRouter.post(
   ValidationMiddleWare(login),
   async (req, res, next) => {
     // console.log(req.validate);
-
-    const { result, token } = await authServices.LoginAdminUser(
+    const { result, token, refreshToken } = await authServices.LoginAdminUser(
       req.validate.body,
     );
+
+    // console.log(refreshToken);
 
     res.status(200).json({
       message: "User login successfully",
       userName: result.fullName,
-      token: token,
+      accessToken: token,
+      refreshToken: refreshToken,
     });
   },
 );
@@ -76,5 +78,19 @@ authRouter.post(
     });
   },
 );
+
+authRouter.get("/refreshtoken", async (req, res, next) => {
+  const { refreshtokenhead } = req.headers;
+
+  if (!refreshtokenhead) {
+    throw new UnauthorizedException("Authorization header is missing");
+  }
+  const NewAccessToken = await authServices.refreshToken(refreshtokenhead);
+
+  res.status(200).json({
+    message: "Generate New Token successfully",
+    accessToken: NewAccessToken,
+  });
+});
 
 export default authRouter;

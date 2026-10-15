@@ -1,10 +1,7 @@
 import UserRepository from "../DB/Repositories/user.repository.js";
 import { UnauthorizedException } from "../common/Utils/Error/exception.error.js";
-import {
-  decodeAndVerifyToken,
-  decodeToken,
-} from "../common/Utils/token.utils.js";
-import { envConfig } from "../Config/env.config.js";
+import { decodeToken } from "../common/Utils/token.utils.js";
+import { TokenTypeEnum } from "../common/constants.js";
 
 // Create a user repository instance
 const userRepo = new UserRepository();
@@ -27,9 +24,9 @@ export const authentication = async (req, res, next) => {
     throw new UnauthorizedException("Invalid Bearer token format");
   }
 
-  const userDataFromDB = await decodeToken(token);
+  const userDataFromDB = await decodeToken(token, "", TokenTypeEnum.ACCESS);
 
-  console.log("userDataFromDB", userDataFromDB);
+  // console.log("userDataFromDB", userDataFromDB);
 
   // 8. Attach the authenticated user to the request object
   req.authUser = userDataFromDB;

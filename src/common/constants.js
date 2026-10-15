@@ -7,3 +7,8 @@ export const roleEnum = {
   ADMIN: "admin",
   SUPERADMIN: "superadmin",
 };
+
+export const TokenTypeEnum = {
+  ACCESS: "access",
+  REFRESH: "refresh",
+};
