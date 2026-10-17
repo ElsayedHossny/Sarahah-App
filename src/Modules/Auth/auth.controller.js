@@ -2,6 +2,8 @@ import { Router } from "express";
 import * as authServices from "./auth.service.js";
 import { login, register } from "./auth.validation.js";
 import { ValidationMiddleWare } from "../../Middleware/validation.middleware.js";
+import { authentication } from "../../Middleware/authentication.middleware.js";
+import { decodeRefreshToken } from "../../Middleware/decodeRefreshToken.middleware.js";
 
 const authRouter = Router();
 
@@ -37,7 +39,29 @@ authRouter.post(
   },
 );
 
-// Login user only
+authRouter.get("/refreshtoken", decodeRefreshToken, async (req, res, next) => {
+  const NewAccessToken = await authServices.refreshToken(req.UserData);
+
+  res.status(200).json({
+    message: "Generate New Token successfully",
+    accessToken: NewAccessToken,
+  });
+});
+
+authRouter.post(
+  "/signout",
+  authentication,
+  decodeRefreshToken,
+  async (req, res, next) => {
+    const result = await authServices.logout({
+      accessData: req.decodeUserData,
+      refreshData: req.refreshTokenData,
+    });
+    res.status(200).json({ message: "LoggedOut successfully", result: result });
+  },
+);
+
+// Login usesr only
 authRouter.post(
   "/user/signin",
   ValidationMiddleWare(login),
@@ -78,19 +102,5 @@ authRouter.post(
     });
   },
 );
-
-authRouter.get("/refreshtoken", async (req, res, next) => {
-  const { refreshtokenhead } = req.headers;
-
-  if (!refreshtokenhead) {
-    throw new UnauthorizedException("Authorization header is missing");
-  }
-  const NewAccessToken = await authServices.refreshToken(refreshtokenhead);
-
-  res.status(200).json({
-    message: "Generate New Token successfully",
-    accessToken: NewAccessToken,
-  });
-});
 
 export default authRouter;

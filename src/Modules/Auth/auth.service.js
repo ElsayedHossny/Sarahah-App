@@ -19,6 +19,11 @@ import {
   generateToken,
 } from "../../common/Utils/token.utils.js";
 import { roleEnum, TokenTypeEnum } from "../../common/constants.js";
+import {
+  calculationTTL,
+  setRedis,
+} from "../../common/Services/redis.service.js";
+import { uuid } from "uuidv4";
 
 /**
 find 
@@ -98,6 +103,7 @@ export const LoginAdminUser = async (body) => {
     secret,
     {
       expiresIn,
+      jwtid: uuid(),
     },
   );
 
@@ -113,15 +119,14 @@ export const LoginAdminUser = async (body) => {
     refreshsecret,
     {
       expiresIn: refreshexpiresIn,
+      jwtid: uuid(),
     },
   );
 
   return { result, token, refreshToken };
 };
 
-export const refreshToken = async (token) => {
-  const user = await decodeToken(token, "", TokenTypeEnum.REFRESH);
-
+export const refreshToken = async (user) => {
   const { secret, expiresIn } = generateSecretAndExpiresInToken(
     TokenTypeEnum.ACCESS,
     user.role,
@@ -136,6 +141,7 @@ export const refreshToken = async (token) => {
     secret,
     {
       expiresIn,
+      jwtid: uuid(),
     },
   );
 
@@ -143,6 +149,30 @@ export const refreshToken = async (token) => {
 
   return NewAccessToken;
 };
+
+export const logout = async ({ accessData, refreshData }) => {
+  const { exp: accessExpiration, jti: accessId } = accessData;
+  const { exp: refreshExpiration, jti: refreshId } = refreshData;
+
+  const accessTTL = calculationTTL(accessExpiration);
+  const refreshTTL = calculationTTL(refreshExpiration);
+
+  Promise.all([
+    setRedis({
+      key: `bl_${TokenTypeEnum.ACCESS}_${accessId}`,
+      value: "true",
+      options: { EX: accessTTL },
+    }),
+    setRedis({
+      key: `bl_${TokenTypeEnum.REFRESH}_${refreshId}`,
+      value: "true",
+      options: { EX: refreshTTL },
+    }),
+  ]);
+
+  return { accessTTL, refreshTTL };
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 export const userLoginOnly = async (body) => {
   const result = await baseCheckLogin(body);
@@ -162,6 +192,7 @@ export const userLoginOnly = async (body) => {
     userEnvConfig.access_token_secret,
     {
       expiresIn: userEnvConfig.access_token_expires_in,
+      jwtid: uuid(),
     },
   );
 
@@ -204,6 +235,7 @@ export const adminLoginOnly = async (body) => {
     adminEnvConfig.access_token_secret,
     {
       expiresIn: adminEnvConfig.access_token_expires_in,
+      jwtid: uuid(),
     },
   );
 

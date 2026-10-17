@@ -24,12 +24,16 @@ export const authentication = async (req, res, next) => {
     throw new UnauthorizedException("Invalid Bearer token format");
   }
 
-  const userDataFromDB = await decodeToken(token, "", TokenTypeEnum.ACCESS);
-
-  // console.log("userDataFromDB", userDataFromDB);
+  const { user, decodedDataToken } = await decodeToken(
+    token,
+    "",
+    TokenTypeEnum.ACCESS,
+  );
 
   // 8. Attach the authenticated user to the request object
-  req.authUser = userDataFromDB;
+  req.authUser = user;
+  // access token information
+  req.decodeUserData = decodedDataToken;
 
   // 9. Pass control to the next middleware or route handler
   next();

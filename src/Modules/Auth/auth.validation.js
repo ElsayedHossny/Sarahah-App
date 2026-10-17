@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { roleEnum } from "../../common/constants";
+import { roleEnum } from "../../common/constants.js";
 
 export const loginSchema = z.strictObject({
   email: z.email(),

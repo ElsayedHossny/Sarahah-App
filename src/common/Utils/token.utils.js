@@ -1,8 +1,12 @@
 import jwt from "jsonwebtoken";
 import { envConfig } from "../../Config/env.config.js";
-import { BadRequestException } from "./Error/exception.error.js";
+import {
+  BadRequestException,
+  UnauthorizedException,
+} from "./Error/exception.error.js";
 import UserRepository from "../../DB/Repositories/user.repository.js";
 import { roleEnum, TokenTypeEnum } from "../constants.js";
+import { getRedis } from "../Services/redis.service.js";
 
 const { user: userEnvConfig, admin: adminEnvConfig } = envConfig.jwt;
 
@@ -23,6 +27,8 @@ export const decodeToken = async (
 ) => {
   const decodeToken = jwt.decode(token, options);
 
+  // console.log("tokenType", tokenType);
+
   if (!decodeToken || !decodeToken.role) {
     throw new BadRequestException("Invalid token payload", {
       field: "role",
@@ -38,13 +44,23 @@ export const decodeToken = async (
 
   const decodedData = verifyToken(token, secret);
 
+  const isTokenBlockList = await getRedis(`bl_${tokenType}_${decodedData.jti}`);
+  if (isTokenBlockList) {
+    throw new UnauthorizedException("Token is Revoked...please login again", {
+      message: "This token is revoked, try to re-login",
+      statusCode: 401,
+      errorCode: "UNAUTHORIZED",
+      data: null,
+    });
+  }
+
   const user = await userRepo.findDocumentById(decodedData._id);
 
   if (!user) {
     throw new UnauthorizedException("User not found");
   }
 
-  return user;
+  return { user, decodedDataToken: decodeToken };
 };
 
 // generate secret and expiration time
