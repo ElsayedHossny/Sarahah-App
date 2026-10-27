@@ -1,9 +1,12 @@
 import UserRepository from "../../DB/Repositories/user.repository.js";
 import {
   compareTwoHashs,
+  compareTwoHashsBcrypt,
   hash,
+  hashBcrypt,
 } from "../../common/Utils/Security/hash.security.js";
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   UnauthorizedException,
@@ -14,17 +17,18 @@ import {
 } from "../../common/Utils/Security/encryption.security.js";
 import { envConfig } from "../../Config/env.config.js";
 import {
-  decodeToken,
   generateSecretAndExpiresInToken,
   generateToken,
 } from "../../common/Utils/token.utils.js";
 import { roleEnum, TokenTypeEnum } from "../../common/constants.js";
 import {
   calculationTTL,
+  getRedis,
   setRedis,
 } from "../../common/Services/redis.service.js";
 import { uuid } from "uuidv4";
-
+import { emitter } from "../../common/Services/email.service.js";
+import crypto from "node:crypto";
 /**
 find 
 findById
@@ -74,6 +78,20 @@ export const registerUser = async (body) => {
 
   const hashPassword = await hash(password);
 
+  //sending otp
+  const OTP = crypto.randomInt(100000, 1000000).toString();
+
+  emitter.emit("sendingOTP-Event", email, OTP);
+
+  const hashOTP = await hashBcrypt(OTP, 10);
+
+  await setRedis({
+    key: `email_verification:${email}`,
+    value: hashOTP,
+    options: { EX: 300 },
+  });
+
+  /////////////////////
   return authRepo.createOneDocument({
     firstName,
     lastName,
@@ -84,6 +102,42 @@ export const registerUser = async (body) => {
     phone: phoneEncryption,
     role,
   });
+};
+
+export const OTPVerify = async (email, otp) => {
+  const hashotp = await getRedis(`email_verification:${email}`);
+
+  // Check whether the OTP exists or has expired
+  if (!hashotp) {
+    throw new BadRequestException("OTP verification failed", {
+      field: "otp",
+      code: "INVALID_OR_EXPIRED_OTP",
+      message: "The OTP is invalid or has expired.",
+      suggestion: "Please request a new OTP and try again.",
+    });
+  }
+
+  // Compare the plain OTP with the stored hash
+  const isValid = await compareTwoHashsBcrypt(otp, hashotp);
+
+  if (!isValid) {
+    throw new BadRequestException("OTP verification failed", {
+      field: "otp",
+      code: "INVALID_OR_EXPIRED_OTP",
+      message: "The OTP is invalid or has expired.",
+      suggestion: "Please request a new OTP and try again.",
+    });
+  }
+
+  const user = await authRepo.findOneAndUpdateDocument(
+    { email },
+    {
+      isVerifyAcount: true,
+    },
+    { returnDocument: "after" },
+  );
+
+  return user;
 };
 
 export const LoginAdminUser = async (body) => {

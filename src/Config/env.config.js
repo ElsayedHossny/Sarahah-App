@@ -7,7 +7,8 @@ dotenv.config({ path: [`.${process.env.NODE_ENV}.env`, ".env"] });
 
 export const envConfig = {
   database: {
-    uri: process.env.DB_URI_LOCAL ?? "mongodb://127.0.0.1:27017/test-db",
+    //mongodb://localhost:27017/Sarahah-App
+    uri: process.env.DB_URI_LOCAL ?? "mongodb://127.0.0.1:27017/Sarahah-App",
   },
   encryption: {
     key: process.env.ENCRYPTION_KEY,
@@ -29,5 +30,9 @@ export const envConfig = {
   },
   redis: {
     url: process.env.REDIS_URL,
+  },
+  email: {
+    senderEmailOtp: process.env.ADMIN_EMAIL_SENDING_OTP,
+    senderPasswordOtp: process.env.ADMIN_PASSWORD_EMAIL_SENDING_OTP,
   },
 };

@@ -12,3 +12,9 @@ export const TokenTypeEnum = {
   ACCESS: "access",
   REFRESH: "refresh",
 };
+
+export const allowedExtensions = {
+  image: ["png", "jpeg"],
+  vedio: ["mp4"],
+  application: ["pdf", "xlxs"],
+};

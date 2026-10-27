@@ -3,6 +3,7 @@ import * as userServices from "./user.service.js";
 import { authentication } from "../../Middleware/authentication.middleware.js";
 import { authorization } from "../../Middleware/authorization.middleware.js";
 import { roleEnum } from "../../common/constants.js";
+import { multerUpload } from "../../Middleware/multer.middleware.js";
 
 const userRouter = Router();
 
@@ -54,6 +55,14 @@ userRouter.get(
   async (req, res, next) => {
     const result = await userServices.findAllUsers();
     res.json({ message: "all User Profile", result });
+  },
+);
+
+userRouter.post(
+  "/upload",
+  multerUpload({ desiredPath: "Covers" }).single("image"),
+  async (req, res, next) => {
+    res.json({ message: "uploaded sucessfully", result: req.file });
   },
 );
 
