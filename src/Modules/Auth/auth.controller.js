@@ -48,6 +48,7 @@ authRouter.get("/refreshtoken", decodeRefreshToken, async (req, res, next) => {
   });
 });
 
+// Logout general
 authRouter.post(
   "/signout",
   authentication,
@@ -61,6 +62,7 @@ authRouter.post(
   },
 );
 
+// verify-email
 authRouter.get("/verify-email", async (req, res, next) => {
   const { email, otp } = req.body;
   const result = await authServices.OTPVerify(email, otp);
@@ -112,5 +114,13 @@ authRouter.post(
     });
   },
 );
+
+authRouter.post("/sendmail", async (req, res, next) => {
+  const x = await authServices.sendEmailverify();
+  res.status(200).json({
+    message: "Sended Email Successfully",
+    result: x,
+  });
+});
 
 export default authRouter;

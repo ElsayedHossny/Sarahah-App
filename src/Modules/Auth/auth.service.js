@@ -1,8 +1,8 @@
 import UserRepository from "../../DB/Repositories/user.repository.js";
 import {
-  compareTwoHashs,
+  compareTwoHashs_argon2,
   compareTwoHashsBcrypt,
-  hash,
+  hash_argon2,
   hashBcrypt,
 } from "../../common/Utils/Security/hash.security.js";
 import {
@@ -49,7 +49,10 @@ const baseCheckLogin = async (body) => {
   if (!isExist) {
     throw new UnauthorizedException("Email Not Exist.");
   }
-  const isPasswordCorrect = await compareTwoHashs(isExist.password, password);
+  const isPasswordCorrect = await compareTwoHashs_argon2(
+    isExist.password,
+    password,
+  );
   if (!isPasswordCorrect) {
     throw new UnauthorizedException("Email or Password Not Correct.");
   }
@@ -76,7 +79,7 @@ export const registerUser = async (body) => {
 
   const phoneEncryption = encryptionSymmetric(phone);
 
-  const hashPassword = await hash(password);
+  const hashPassword = await hash_argon2(password);
 
   //sending otp
   const OTP = crypto.randomInt(100000, 1000000).toString();
@@ -307,4 +310,13 @@ export const adminLoginOnly = async (body) => {
   );
 
   return { result, token, refreshToken };
+};
+
+export const sendEmailverify = async () => {
+  const res = await sendEmail(
+    "Testing",
+    "elsayedhossny909@icloud.com",
+    "<h1>HellokcxljcnvscthyjkhAN</h1>",
+  );
+  return res;
 };

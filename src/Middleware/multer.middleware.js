@@ -20,7 +20,7 @@ export const multerUpload = ({ desiredPath }) => {
       cb(null, `${suffix}_${file.originalname}`);
     },
   });
-
+  // Filter
   const fileFilter = (req, file, cb) => {
     const [fileMimeType, fileExtension] = file.mimetype.split("/");
 
