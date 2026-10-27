@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { genderEnum, roleEnum } from "../../common/constants.js";
+import { type } from "node:os";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -40,6 +41,10 @@ const UserSchema = new mongoose.Schema(
     },
     profilePicture: String,
     phone: String,
+    isVerifyAcount: {
+      type: Boolean,
+      default: false,
+    },
     role: {
       type: String,
       enum: Object.values(roleEnum),

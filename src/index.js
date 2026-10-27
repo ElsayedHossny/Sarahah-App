@@ -6,6 +6,7 @@ import messageRouter from "./Modules/Messages/messages.controller.js";
 import dbConnection from "./DB/db.connect.js";
 import globalErrorHandler from "./Middleware/global-error-handler.middleware.js";
 import { redisConnection } from "./common/Clients/redis.client.js";
+import { EmailConnection } from "./common/Clients/email.client.js";
 
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(express.json());
 
 dbConnection();
 redisConnection();
-
+EmailConnection();
 app.get("/", (req, res) => {
   res.json({ message: "Hello World :::::" });
 });
@@ -30,6 +31,17 @@ app.use((req, res) => {
 // handle Error
 app.use(globalErrorHandler);
 // Server Connect
+
+console.log("PORT:", process.env.PORT);
+
+const server = app.listen(process.env.PORT, () => {
+  console.log("Server is running on port:", server.address().port);
+});
+
+server.on("error", (error) => {
+  console.error("Server error:", error);
+});
+
 app.listen(process.env.PORT, () => {
   console.log("Server is running ::");
 });

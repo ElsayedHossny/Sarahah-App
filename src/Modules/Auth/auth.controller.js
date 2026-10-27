@@ -61,6 +61,16 @@ authRouter.post(
   },
 );
 
+authRouter.get("/verify-email", async (req, res, next) => {
+  const { email, otp } = req.body;
+  const result = await authServices.OTPVerify(email, otp);
+  res.status(200).json({
+    success: true,
+    message: "OTP verified successfully",
+    result: result,
+  });
+});
+
 // Login usesr only
 authRouter.post(
   "/user/signin",
