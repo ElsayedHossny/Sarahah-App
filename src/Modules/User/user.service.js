@@ -24,6 +24,18 @@ export const updatedProfile = async (body, userId) => {
   return userRepo.updateOneWithSave(userId, email, body);
 };
 
+export const updatedProfilePicure = async (user, file) => {
+  // profilePicture
+  const { email } = user;
+  const { path } = file;
+  const userProfile = userRepo.findOneAndUpdateDocument(
+    { email },
+    { profilePicture: path },
+    { returnDocument: "after" },
+  );
+  return userProfile;
+};
+
 export const deleteProfile = async (userId) => {
   return userRepo.findOneAndDeleteDocument(userId);
 };

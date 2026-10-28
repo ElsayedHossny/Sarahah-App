@@ -4,6 +4,7 @@ import { authentication } from "../../Middleware/authentication.middleware.js";
 import { authorization } from "../../Middleware/authorization.middleware.js";
 import { roleEnum } from "../../common/constants.js";
 import { multerUpload } from "../../Middleware/multer.middleware.js";
+import { multerValidation } from "../../Middleware/MulterValidation.middleware.js";
 
 const userRouter = Router();
 
@@ -58,11 +59,39 @@ userRouter.get(
   },
 );
 
+// fields([
+//     { name: "image", maxCount: 1 },
+//     { name: "image2", maxCount: 2 },
+//   ])
+
+userRouter.post(
+  "/profile-picture",
+  authentication,
+  multerUpload({ desiredPath: "profiles" }).single("profile"),
+  multerValidation,
+  async (req, res, next) => {
+    const file = req.file;
+    const { authUser } = req;
+
+    const result = await userServices.updatedProfilePicure(authUser, file);
+    res.json({
+      message: "profile-picture uploaded sucessfully",
+      result,
+    });
+  },
+);
+
 userRouter.post(
   "/upload",
   multerUpload({ desiredPath: "Covers" }).single("image"),
+  multerValidation,
   async (req, res, next) => {
-    res.json({ message: "uploaded sucessfully", result: req.file });
+    const files = req.files ?? req.file;
+
+    res.json({
+      message: "uploaded sucessfully",
+      result: files,
+    });
   },
 );
 

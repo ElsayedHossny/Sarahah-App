@@ -23,6 +23,7 @@ import {
 import { roleEnum, TokenTypeEnum } from "../../common/constants.js";
 import {
   calculationTTL,
+  delRedis,
   getRedis,
   setRedis,
 } from "../../common/Services/redis.service.js";
@@ -64,6 +65,7 @@ const baseCheckLogin = async (body) => {
   return isExist;
 };
 ////////////////////////////////////////////////////////////////////////////
+
 export const registerUser = async (body) => {
   const { firstName, lastName, email, password, gender, age, phone, role } =
     body;
@@ -107,9 +109,8 @@ export const registerUser = async (body) => {
   });
 };
 
-export const OTPVerify = async (email, otp) => {
+const CompareOTPOnlyToVerify = async (email, otp) => {
   const hashotp = await getRedis(`email_verification:${email}`);
-
   // Check whether the OTP exists or has expired
   if (!hashotp) {
     throw new BadRequestException("OTP verification failed", {
@@ -132,6 +133,12 @@ export const OTPVerify = async (email, otp) => {
     });
   }
 
+  return isValid;
+};
+
+export const OTPVerify = async (email, otp) => {
+  await CompareOTPOnlyToVerify(email, otp);
+
   const user = await authRepo.findOneAndUpdateDocument(
     { email },
     {
@@ -143,6 +150,84 @@ export const OTPVerify = async (email, otp) => {
   return user;
 };
 
+/// change password
+/*
+1- forget password
+2- reset password
+ */
+
+export const forgetPassword = async (email) => {
+  // 1- check if exist
+  const isExist = await authRepo.findOneDocument({ email });
+  if (!isExist) {
+    throw new ConflictException("Email Not exists", {
+      error: "Email Conflict",
+    });
+  }
+  // 2- update status
+  const userNotVerify = authRepo.findOneAndUpdateDocument(
+    { email },
+    {
+      isVerifyAcount: false,
+    },
+    { returnDocument: "after" },
+  );
+  // 3- generate OTP
+  await generatedAndSetOTPInRedis(email);
+  return userNotVerify;
+};
+
+const generatedAndSetOTPInRedis = async (email) => {
+  const OTP = crypto.randomInt(100000, 1000000).toString();
+  // emitter send email
+  emitter.emit("sendingOTP-Event", email, OTP);
+  const hashOTP = await hashBcrypt(OTP, 10);
+  await setRedis({
+    key: `email_verification:${email}`,
+    value: hashOTP,
+    options: { EX: 300 },
+  });
+};
+
+export const resetPassword = async (email, otp, password) => {
+  const result = await CompareOTPOnlyToVerify(email, otp);
+  if (!result) {
+    throw new BadRequestException("OTP verification failed", {
+      field: "otp",
+      code: "INVALID_OR_EXPIRED_OTP",
+      message: "The OTP is invalid or has expired.",
+      suggestion: "Please request a new OTP and try again.",
+    });
+  }
+  const hashPassword = await hash_argon2(password);
+  const userAfterUpdated = authRepo.findOneAndUpdateDocument(
+    { email },
+    {
+      isVerifyAcount: true,
+      password: hashPassword,
+    },
+    { returnDocument: "after" },
+  );
+
+  return userAfterUpdated;
+};
+//////////////////////////////////////////////////////////////////////////////////////
+
+//// reset OTP
+
+export const resetOTP = async (email) => {
+  const isExist = await authRepo.findOneDocument({ email });
+  if (!isExist) {
+    throw new ConflictException("Email Not exists", {
+      error: "Email Conflict",
+    });
+  }
+  await delRedis(`email_verification:${email}`);
+  await generatedAndSetOTPInRedis(email);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 export const LoginAdminUser = async (body) => {
   const result = await baseCheckLogin(body);
 

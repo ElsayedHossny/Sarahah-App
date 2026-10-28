@@ -14,7 +14,11 @@ export const TokenTypeEnum = {
 };
 
 export const allowedExtensions = {
-  image: ["png", "jpeg"],
+  image: ["png", "jpeg", "heic"],
   vedio: ["mp4"],
   application: ["pdf", "xlxs"],
+};
+export const normalizedExt = {
+  jpeg: "jpg",
+  jpe: "jpg",
 };

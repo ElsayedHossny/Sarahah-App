@@ -73,6 +73,40 @@ authRouter.get("/verify-email", async (req, res, next) => {
   });
 });
 
+/// change password
+/*
+1- forget password
+2- reset password
+ */
+authRouter.get("/forgetPassword", async (req, res, next) => {
+  const { email } = req.body;
+  const result = await authServices.forgetPassword(email);
+  res.status(200).json({
+    success: true,
+    message: "Email Exist Check Your Email OTP",
+    result: result,
+  });
+});
+authRouter.post("/resetPassword", async (req, res, next) => {
+  const { email, otp, password } = req.body;
+  const result = await authServices.resetPassword(email, otp, password);
+  res.status(200).json({
+    success: true,
+    message: "Email Exist Check Your Email OTP",
+    result: result,
+  });
+});
+//// reset OTP
+authRouter.get("/resetOTP", async (req, res, next) => {
+  const { email } = req.body;
+  const result = await authServices.resetOTP(email);
+  res.status(200).json({
+    success: true,
+    message: "Email Exist Check Your Email OTP",
+    result: result,
+  });
+});
+
 // Login usesr only
 authRouter.post(
   "/user/signin",

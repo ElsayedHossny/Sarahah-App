@@ -44,5 +44,5 @@ export const multerUpload = ({ desiredPath }) => {
     }
   };
 
-  return multer({ storage: storage, fileFilter: fileFilter });
+  return multer({ fileFilter, storage });
 };

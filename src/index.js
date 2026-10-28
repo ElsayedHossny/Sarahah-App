@@ -19,6 +19,8 @@ app.get("/", (req, res) => {
   res.json({ message: "Hello World :::::" });
 });
 
+app.use("/uploads", express.static("uploads"));
+
 // Router middlewares
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
