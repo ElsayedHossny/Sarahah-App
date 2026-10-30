@@ -35,4 +35,5 @@ export const envConfig = {
     senderEmailOtp: process.env.ADMIN_EMAIL_SENDING_OTP,
     senderPasswordOtp: process.env.ADMIN_PASSWORD_EMAIL_SENDING_OTP,
   },
+  originDomains: process.env.ORIGINACCESS.split(","),
 };

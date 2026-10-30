@@ -1,5 +1,8 @@
 import "./Config/env.config.js";
 import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+
 import authRouter from "./Modules/Auth/auth.controller.js";
 import userRouter from "./Modules/User/user.controller.js";
 import messageRouter from "./Modules/Messages/messages.controller.js";
@@ -10,11 +13,12 @@ import { EmailConnection } from "./common/Clients/email.client.js";
 
 const app = express();
 
-app.use(express.json());
+app.use(cors(), helmet(), express.json());
 
 dbConnection();
 redisConnection();
 EmailConnection();
+
 app.get("/", (req, res) => {
   res.json({ message: "Hello World :::::" });
 });
